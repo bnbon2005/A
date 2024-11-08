@@ -1,0 +1,255 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <style>
+
+@import url("https://fonts.googleapis.com/css?family=Montserrat:400,400i,700");
+
+* {
+    box-sizing: border-box;
+}
+
+body {
+    height: 100vh;
+    margin: 0;
+    background-color: hsl(34, 78%, 91%);
+    overflow: hidden;
+}
+
+h1 {
+    position: absolute;
+    width: 100%;
+    top: 1rem;
+    text-align: center;
+}
+
+.container {
+    position: relative;
+    height: 100vh;
+}
+
+button {
+    font-size: 1.2em;
+    padding: 10px 20px;
+    cursor: pointer;
+    border: none;
+
+    position: absolute;
+    top: 50%;
+
+    --button-spacing: 4rem;
+
+    transition: all 0.1s ease-out;
+}
+
+button#trick-button {
+    color: rgb(0, 0, 0);
+    background-color: rgba(242, 119, 197, 0.389);
+    left: calc(50% - var(--button-spacing));
+    z-index: 3;
+}
+
+button#treat-button {
+    color: rgb(0, 0, 0);
+    background-color: rgba(242, 119, 197, 0.389);
+    left: calc(50% + var(--button-spacing));
+    z-index: 2;
+}
+
+#toast-container {
+    position: fixed;
+    top: 1rem;
+    right: 1rem;
+    z-index: 5;
+    .toast {
+        width: min(70vw, 300px);
+        background-color: var(--pico-secondary-background);
+        padding: 1rem;
+        margin-bottom: 0.25rem;
+        border-radius: 0.25rem;
+        display: flex;
+        justify-content: flex-start;
+        align-items: center;
+        gap: 1rem;
+        font-family: Montserrat, sans-serif;
+        font-size: 1.25rem;
+
+        opacity: 0;
+        transition: opacity 0.5s ease;
+        &.visible {
+            opacity: 1;
+        }
+        &.success {
+            color: #fff;
+            background-color: #653552;
+        }
+        &.error {
+            color: #fff;
+            background-color: #ffffff50;
+        }
+    }
+}
+
+#overlay {
+    --opacity: 0;
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 250px;
+    height: 250px;
+    border-radius: 50%;
+    border-width: 10000px;
+    border-style: solid;
+    border-color: rgb(0 0 0 / var(--opacity));
+    background-color: transparent;
+    transform: translate3d(-50%, -50%, 0);
+    z-index: 4;
+    pointer-events: none;
+    filter: blur(12px);
+}
+
+    </style>
+</head>
+<body>
+    
+    <h1>بس اووول تحبيني؟جربي لا</h1>
+    <div class="container">
+        <button id="trick-button">ايه</button>
+    </div>
+    <div class="button-container">
+        <button id="treat-button">لا</button>
+    </div>
+    
+    <div id="toast-container"></div>
+    
+    <div id="overlay"></div>
+
+    <script>
+
+console.clear();
+const trickBtn = document.querySelector("#trick-button");
+const treatBtn = document.querySelector("#treat-button");
+
+class Toast {
+    constructor(container) {
+        this.container = document.querySelector(`#${container}`);
+        this.toasts = [];
+        this.trickMsgs = [
+            "انا بعد!",
+            "غصب عنك.",
+            "شكرا",
+            "احترم شعورك.",
+            "امووتتت فيك!",
+            "احلفي?",
+            "كنت اعرف!",
+            "بوسااااات",
+        ];
+        this.msgs = ["انقلعي!"];
+    }
+
+    add(newToast) {
+        this.toasts.push(newToast);
+        this.updateUI();
+
+        setTimeout(() => {
+            document.querySelector(`#tst-${newToast.id}`).classList.remove("visible");
+        }, 3000);
+
+        setTimeout(() => {
+            this.remove(newToast.id);
+        }, 3500);
+    }
+
+    remove(uid) {
+        this.toasts = this.toasts.filter((toast) => toast.id !== uid);
+        this.updateUI();
+    }
+
+    updateUI() {
+        this.container.innerHTML = this.toasts
+            .map((toast) => {
+                return `
+        <div id="tst-${toast.id}" class="toast visible ${toast.status}">
+          ${toast.status === "success" ?"" : ""} 
+          ${toast.status === "error" ?"" : ""} 
+          ${toast.msg}
+        </div>
+      `;
+            })
+            .join("");
+    }
+}
+
+const toast = new Toast("toast-container");
+
+treatBtn.addEventListener("mouseover", (e) => {
+    moveTrickBtn();
+    randomizeTreatBtn();
+});
+
+trickBtn.addEventListener("click", (e) => {
+    const newToast = {
+        id: crypto.randomUUID(),
+        msg: toast.trickMsgs[Math.floor(Math.random() * toast.trickMsgs.length)],
+        status: "error"
+    };
+
+    toast.add(newToast);
+
+    // الانتقال إلى صفحة جديدة بعد عرض التوست
+    setTimeout(() => {
+        window.location.href = "tgiim.html"; // استبدل هذا بالرابط الذي تود الانتقال إليه
+    }, 1000); // الانتقال بعد ثانية من النقر
+});
+
+treatBtn.addEventListener("click", (e) => {
+    const newToast = {
+        id: crypto.randomUUID(),
+        msg: toast.msgs[Math.floor(Math.random() * toast.msgs.length)],
+        status: "success"
+    };
+
+    toast.add(newToast);
+});
+
+function moveTrickBtn() {
+    trickBtn.style.left = treatBtn.getBoundingClientRect().left + "px";
+    trickBtn.style.top = treatBtn.getBoundingClientRect().top + "px";
+}
+
+function randomizeTreatBtn() {
+    treatBtn.style.left =
+        Math.random() * (window.innerWidth - treatBtn.getBoundingClientRect().width) +
+        "px";
+    treatBtn.style.top =
+        Math.random() *
+            (window.innerHeight - treatBtn.getBoundingClientRect().height) +
+        "px";
+}
+
+let mouseIsInView = false;
+let opacity = 0;
+const overlay = document.querySelector("#overlay");
+
+document.body.addEventListener("mouseenter", (e) => {
+    mouseIsInView = true;
+    opacity += 0.05;
+    overlay.style.borderColor = `rgb(0 0 0 / ${opacity.toFixed(1)}`;
+});
+
+document.body.addEventListener("mouseleave", (e) => {
+    mouseIsInView = false;
+});
+
+addEventListener("mousemove", (e) => {
+    overlay.style.top = e.clientY + "px";
+    overlay.style.left = e.clientX + "px";
+});
+
+    </script>
+
+</body>
+</html>
